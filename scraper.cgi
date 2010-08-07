@@ -86,8 +86,10 @@ def generate_rss():
             mdns + 'source_query_date' : datetime.now().strftime(isodate),
             })
         if election.get('datum_python', None):
-            subitem = etree.SubElement(termine, mdns + 'start_date')
-            subitem.text = election['datum_python'].strftime(isodate)
+            start_date = etree.SubElement(termine, mdns + 'start_date')
+            start_date.text = election['datum_python'].strftime(isodate)
+            end_date = etree.SubElement(termine, mdns + 'end_date')
+            end_date.text = election['datum_python'].strftime(isodate)
     return root
 
 if __name__ == '__main__':

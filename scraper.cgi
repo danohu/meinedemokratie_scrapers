@@ -20,6 +20,7 @@ monthnames_de = [u'januar', u'februar', u'm\xe4rz', u'april', u'mai', u'juni', u
 
 FEEDLINK = 'http://www.wahlrecht.de/termine.htm'
 GENERATOR_URL = 'http://github.com/danohuiginn/wahltermine_scraper'
+isodate = '%FT%H:%M:%S' #iso format for python strftime
 
 def replace_monthname(instr):
         """turn e.g. März --> 3"""
@@ -47,7 +48,7 @@ def get_termine():
             for dateformat in ('%Y %d. %m', '%Y %d.%m'):
                 try:
                     dateobj = datetime.strptime(datestr, dateformat)
-                    info['date_formatted'] = dateobj.strftime('%F')
+                    info['datum_python'] = dateobj
                     break
                 except Exception:
                     continue
@@ -62,23 +63,31 @@ def add_xml_children(parent, datadict):
 
 def generate_rss():
     md = 'http://www.meine-demokratie.de'
+    mdns = '{' + md + '}'
     root = etree.Element('rss', nsmap = {'md' : md})
     channel = etree.SubElement(root, 'channel')
     add_xml_children(channel,
-            {'title' : 'Walhtermine',
+            {'title' : 'Wahltermine',
              'link'  : FEEDLINK,
              'description' : 'Wahltermine',
              'generator'   : GENERATOR_URL,
-             '{http://www.w3.org/1999/xhtml}body' : 'ABC',
-             '{%s}source_query_date' % md : datetime.now().strftime('%FT%H%M%S'),
              })
+
     for election in get_termine():
         termine = etree.SubElement(channel, 'item')
         add_xml_children(termine, {
-            'title' : '%s Wahlen, %s' % (election['art'], election['land']),
+            'title' : '%s Wahl %s' % (election['art'], election['land']),
             'link'  : FEEDLINK,
-            'description' : '',
-            'pubDate' : datetime.now().strftime('%F')})
+            'description' : 'Wahl',
+            'guid' : 'wahl_%s_%s' % (election['land'], election['datum_str']),
+            'category' : 'Wahl',
+            'pubDate' : datetime.now().strftime('%F'),
+            mdns + 'address' : election['land'],
+            mdns + 'source_query_date' : datetime.now().strftime(isodate),
+            })
+        if election.get('datum_python', None):
+            subitem = etree.SubElement(termine, mdns + 'start_date')
+            subitem.text = election['datum_python'].strftime(isodate)
     return root
 
 if __name__ == '__main__':

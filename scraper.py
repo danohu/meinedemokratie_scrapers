@@ -7,6 +7,8 @@ from scraperutils import *
 import re
 from datetime import datetime
 from lxml import etree
+import cgi
+
 
 """
 Requires:
@@ -58,7 +60,7 @@ def add_xml_children(parent, datadict):
         subitem.text = value
     return parent
 
-def generate_rss_lxml():
+def generate_rss():
     md = 'http://www.meine-demokratie.de'
     root = etree.Element('rss', nsmap = {'md' : md})
     channel = etree.SubElement(root, 'channel')
@@ -77,20 +79,9 @@ def generate_rss_lxml():
             'link'  : FEEDLINK,
             'description' : '',
             'pubDate' : datetime.now().strftime('%F')})
-    print(etree.tostring(root, pretty_print = True))
+    return root
 
-def generate_rss():
-    rssentries = []
-    for item in get_termine():
-        rssentries.append(PyRSS2Gen.RSSItem(
-            ))
-
-    feed = PyRSS2Gen.RSS2(
-      title = 'Wahltermine',
-      link = FEEDLINK,
-      description = 'Wahltermine',
-      generator = 'http://github.com/danohuiginn/wahltermine_scraper',
-      lastBuildDate = datetime.now(),
-      items = rssentries)
-    return feed
+if __name__ == '__main__':
+    print "Content-type: text/xml"
+    print etree.tostring(generate_rss(), pretty_print = True)
 

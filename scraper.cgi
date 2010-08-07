@@ -83,5 +83,7 @@ def generate_rss():
 
 if __name__ == '__main__':
     print "Content-type: text/xml"
+    print ""
+    print '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
     print etree.tostring(generate_rss(), pretty_print = True)
 
